@@ -87,6 +87,10 @@ interface PaymentInfoInterface {
          */
         private $debitorName = '';
 
+        //Postal Address
+        private $debitorAddressLine = '';
+        private $debitorCountry = '';
+
 		/**
 		 * International Bank Account Number (IBAN) - identifier used internationally by financial institutions
 		 * to uniquely identify the account of a customer.
@@ -266,6 +270,14 @@ interface PaymentInfoInterface {
             return $this->debitorName;
         }
 
+        public function getDebitorAddressLine() {
+            return $this->debitorAddressLine;
+        }
+
+        public function getDebitorCountry() {
+            return $this->debitorCountry;
+        }
+
 		/**
 		 * Unique identification, as assigned by a sending party, to unambiguously identify
 		 * the payment information group within the message.
@@ -407,6 +419,32 @@ interface PaymentInfoInterface {
             }
 
             $this->debitorName = $debitorName;
+            return $this;
+        }
+
+        public function setDebitorAddressLine($name) {
+            $name = $this->unicodeDecode($name);
+
+            if ( !$this->checkStringLength($name, 140)) {
+
+                throw new \Exception(ERROR_MSG_INITIATING_PARTY_NAME);
+            }
+
+            $this->debitorAddressLine = $name;
+
+            return $this;
+        }
+
+        public function setDebitorCountry($name) {
+            $name = $this->unicodeDecode($name);
+
+            if ( !$this->checkStringLength($name, 140)) {
+
+                throw new \Exception(ERROR_MSG_INITIATING_PARTY_NAME);
+            }
+
+            $this->debitorCountry = $name;
+
             return $this;
         }
 
@@ -984,6 +1022,12 @@ interface PaymentInfoInterface {
         public function addDebitorFieldsToXml(\SimpleXMLElement $paymentInfo) {
             $debitor = $paymentInfo->addChild('Dbtr');
             $debitor->addChild('Nm', $this->getDebitorName());
+
+            if ( $this->getDebitorAddressLine() && $this->getDebitorCountry()) {
+                $postalAddress = $debitor->addChild('PstlAdr');
+                $postalAddress->addChild('AdrLine', $this->getDebitorAddressLine());
+                $postalAddress->addChild('Ctry', $this->getDebitorCountry());
+            }
 
             $debitorAccount = $paymentInfo->addChild('DbtrAcct');
             $debitorAccountID = $debitorAccount->addChild('Id');

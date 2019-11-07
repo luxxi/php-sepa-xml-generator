@@ -58,12 +58,20 @@ class CreditTransferTransaction extends PaymentInfo implements TransactionInterf
      */
     private $creditInvoice = '';
 
+    private $creditInvoiceCode = '';
+
+    private $creditInvoiceReference = '';
+
 
     /**
      * Creditor Name
      * @var string
      */
     private $creditorName = '';
+
+    //Postal Address
+    private $creditorAddressLine = '';
+    private $creditorCountry = '';
 
 
     private $currency = '';
@@ -170,6 +178,14 @@ class CreditTransferTransaction extends PaymentInfo implements TransactionInterf
         return $this->creditInvoice;
     }
 
+    public function getCreditInvoiceCode() {
+        return $this->creditInvoiceCode;
+    }
+
+    public function getCreditInvoiceReference() {
+        return $this->creditInvoiceReference;
+    }
+
 
     /**
      * Credit Invoice
@@ -188,12 +204,42 @@ class CreditTransferTransaction extends PaymentInfo implements TransactionInterf
         return $this;
     }
 
+    public function setCreditInvoiceCode($invoice) {
+        $invoice = $this->unicodeDecode($invoice);
+
+        if ( !$this->checkStringLength($invoice, 140) ) {
+
+            throw new \Exception(ERROR_MSG_DD_INVOICE_NUMBER . $this->getInstructionIdentification());
+        }
+        $this->creditInvoiceCode = $invoice;
+        return $this;
+    }
+
+    public function setCreditInvoiceReference($invoice) {
+        $invoice = $this->unicodeDecode($invoice);
+
+        if ( !$this->checkStringLength($invoice, 140) ) {
+
+            throw new \Exception(ERROR_MSG_DD_INVOICE_NUMBER . $this->getInstructionIdentification());
+        }
+        $this->creditInvoiceReference = $invoice;
+        return $this;
+    }
+
 
     /**
      * @return string
      */
     public function getCreditorName() {
         return $this->creditorName;
+    }
+
+    public function getCreditorAddressLine() {
+        return $this->creditorAddressLine;
+    }
+
+    public function getCreditorCountry() {
+        return $this->creditorCountry;
     }
 
     /**
@@ -210,6 +256,32 @@ class CreditTransferTransaction extends PaymentInfo implements TransactionInterf
             throw new \Exception(ERROR_MSG_DD_NAME . $this->getInstructionIdentification());
         }
         $this->creditorName = $name;
+        return $this;
+    }
+
+    public function setCreditorAddressLine($name) {
+        $name = $this->unicodeDecode($name);
+
+        if ( !$this->checkStringLength($name, 140)) {
+
+            throw new \Exception(ERROR_MSG_INITIATING_PARTY_NAME);
+        }
+
+        $this->creditorAddressLine = $name;
+
+        return $this;
+    }
+
+    public function setCreditorCountry($name) {
+        $name = $this->unicodeDecode($name);
+
+        if ( !$this->checkStringLength($name, 140)) {
+
+            throw new \Exception(ERROR_MSG_INITIATING_PARTY_NAME);
+        }
+
+        $this->creditorCountry = $name;
+
         return $this;
     }
 
@@ -255,14 +327,26 @@ class CreditTransferTransaction extends PaymentInfo implements TransactionInterf
         $creditor = $creditTransferTransactionInformation->addChild("Cdtr");
         $creditor->addChild("Nm", $this->getCreditorName());
 
+        if ( $this->getCreditorAddressLine() && $this->getCreditorCountry()) {
+            $postalAddress = $creditor->addChild('PstlAdr');
+            $postalAddress->addChild('AdrLine', $this->getCreditorAddressLine());
+            $postalAddress->addChild('Ctry', $this->getCreditorCountry());
+        }
+
         $creditTransferTransactionInformation->addChild('CdtrAcct')
             ->addChild('Id')
             ->addChild('IBAN', $this->getIBAN());
 
-		if ( $this->getCreditInvoice() ) {
-			$creditTransferTransactionInformation->addChild('RmtInf')
-				->addChild('Ustrd', $this->getCreditInvoice());
-		}
+        $remittance_information = $creditTransferTransactionInformation->addChild('RmtInf');
+        $structured = $remittance_information->addChild('Strd');
+        $creditor_reference_information = $structured->addChild('CdtrRefInf');
+        $creditor_reference_information->addChild('Ref', $this->getCreditInvoiceReference());
+        $structured->addChild('AddtlRmtInf', $this->getCreditInvoice());
+
+        if ( $this->getCreditInvoiceCode() ) {
+            $creditTransferTransactionInformation->addChild('Purp')
+                ->addChild('Cd', $this->getCreditInvoiceCode());
+        }
 
         return $creditTransferTransactionInformation;
 
