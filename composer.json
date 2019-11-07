@@ -1,14 +1,14 @@
 {
-	"name": "dmitrirussu/php-sepa-xml-generator",
+	"name": "luxxi/php-sepa-xml-generator",
 	"version": "1.0.8",
 	"type": "library",
-	"description": "Creates an XML file for a Single Euro Payments Area (SEPA) Direct Debit Payment.",
+	"description": "Creates an XML file for a Single Euro Payments Area (SEPA) Direct Debit Payment. fork: dmitrirussu/php-sepa-xml-generator",
 	"keywords": ["SDD","dirdebit","banking", "sepa", "xml", "sepa-xml","sepa-dirdebit"],
 	"license": "MIT",
 	"authors": [
 		{
-			"name": "Dmitri Russu",
-			"email": "dmitri.russu@gmail.com"
+			"name": "Luka Domitrovič",
+			"email": "luka@domitrovic.si"
 		}
 	],
 	"autoload": {
