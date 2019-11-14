@@ -327,10 +327,9 @@ class CreditTransferTransaction extends PaymentInfo implements TransactionInterf
         $creditor = $creditTransferTransactionInformation->addChild("Cdtr");
         $creditor->addChild("Nm", $this->getCreditorName());
 
-        if ( $this->getCreditorAddressLine() && $this->getCreditorCountry()) {
+        if ( $this->getCreditorAddressLine()) {
             $postalAddress = $creditor->addChild('PstlAdr');
             $postalAddress->addChild('AdrLine', $this->getCreditorAddressLine());
-            $postalAddress->addChild('Ctry', $this->getCreditorCountry());
         }
 
         $creditTransferTransactionInformation->addChild('CdtrAcct')
